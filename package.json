@@ -2,7 +2,9 @@
   "name": "shooty",
   "version": "1.0.0",
   "description": "Takes screenshoots of a website every X time",
-  "main": "index.js",
+  "main": "shooty",
+  "bin"             : {"shooty": "shooty"},
+  "preferGlobal"    : true,
   "dependencies": {
     "meow": "^5.0.0",
     "puppeteer": "^1.5.0"
