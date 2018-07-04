@@ -1,0 +1,23 @@
+{
+  "name": "shooty",
+  "version": "1.0.0",
+  "description": "Takes screenshoots of a website every X time",
+  "main": "index.js",
+  "dependencies": {
+    "meow": "^5.0.0",
+    "puppeteer": "^1.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "website",
+    "screenshots",
+    "quality",
+    "qa",
+    "testing"
+  ],
+  "author": "Carles",
+  "license": "MIT"
+}
