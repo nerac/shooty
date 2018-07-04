@@ -4,9 +4,8 @@ Take photos of any website every certain time. Useful for quality checks.
 
 ## Usage
 
-	> git clone https://github.com/nerac/shooty.git
-	> cd shooty
-	> node index.js --help
+	> npm i -g shooty
+	> shooty --help
 
 	Takes screenshoots of a website url every X time
 
