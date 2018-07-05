@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const puppeteer = require('puppeteer');
+const path = require('path');
+const urlx = require('url');
 const meow = require('meow');
 
 const cli = meow(`
@@ -9,6 +11,7 @@ const cli = meow(`
 
 	Options
 	  --every, -e       Time between every shoot (2m,3h,1d)
+	  --output, -o      Specify an output path (./)
 	  --fullpage, -f    Shoot the entire page not only the viewport
 	  --mobile, -m      Enforces a mobile user agent
 	  --version         Displays current version
@@ -18,6 +21,11 @@ const cli = meow(`
 	  $ shooty https://google.com --every 1h
 `, {
 	flags: {
+		output: {
+			type: 'string',
+			alias: 'o',
+			default: '.'
+		},
 		every: {
 			type: 'string',
 			alias: 'e',
@@ -35,6 +43,7 @@ const cli = meow(`
 		}
 	}
 });
+
 const error = (msg) => {
     console.error('\x1b[31m%s\x1b[0m',`\n  Error: ${msg}`);
     cli.showHelp()
@@ -66,7 +75,7 @@ const shoot = async (url,flags) => {
 
     try{
       let now = (new Date()).toLocaleTimeString();
-      let name = now.replace(/[:]/g,'_')+".png";
+      let name = `${flags.domain}_`+now.replace(/[:]/g,'-')+".png";
       console.log("Taking screenshot at:",now);
       const browser = await puppeteer.launch({ignoreHTTPSErrors:true});
       const page = await browser.newPage();
@@ -75,7 +84,7 @@ const shoot = async (url,flags) => {
         page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25');
       }
       await page.goto(url);
-      await page.screenshot({path: name, fullPage: flags.fullpage});
+      await page.screenshot({path: path.format({dir:flags.o,base:name}).replace("//","/"), fullPage: flags.fullpage});
       await browser.close();
       console.log("Screenshot taken with name:",name);
     }catch(e){
@@ -86,7 +95,8 @@ const shoot = async (url,flags) => {
 const flags = cli.flags;
 const url = extractURL(cli.input);
 const interval = extractInterval(flags.every);
+flags.domain = urlx.parse(url).hostname;
 
-console.log(`Screenshot of ${url} every ${flags.every}`);
+console.log(`Screenshot of ${flags.domain} every ${flags.every}`);
 setInterval(shoot.bind(null,url,flags),interval);
 shoot(url,flags);
