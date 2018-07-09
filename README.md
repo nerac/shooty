@@ -24,7 +24,7 @@ Take photos of any website every certain time. Useful for quality checks.
 
 ## Features
 
-- [ ] Set a start date
+- [X] Set a start date
 - [ ] Set a stoop date
 - [ ] Limit the number of images generated
 
