@@ -22,6 +22,12 @@ Take photos of any website every certain time. Useful for quality checks.
 	Examples
 	$ shooty https://google.com --every 1h
 
+## Features
+
+- [ ] Set a start date
+- [ ] Set a stoop date
+- [ ] Limit the number of images generated
+
 ## Contribute
 
 Feel free to fork, open issues or share any kind of suggestion.

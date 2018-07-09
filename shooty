@@ -8,9 +8,12 @@ const cli = meow(`
 	  $ shooty <url>
 
 	Options
-	  --every, -e       Time between every shoot (2m,3h,1d)
-	  --fullpage, -f    Shoot the entire page not only the viewport
-	  --mobile, -m      Enforces a mobile user agent
+      --start           Date it will start (optional)
+      --end             Date it will stop (optional)
+      --every, -e       Time between every shoot (2m,3h,1d)
+      --limit, -l       Number of photos to maintain (optional)
+	  --fullpage, -f    Shoot the entire page not only the viewport (default: false)
+	  --mobile, -m      Enforces a mobile user agent (default: true)
 	  --version         Displays current version
 	  --help            Displays help
 
@@ -86,7 +89,24 @@ const shoot = async (url,flags) => {
 const flags = cli.flags;
 const url = extractURL(cli.input);
 const interval = extractInterval(flags.every);
+let interval_id = null;
+function record(){
+    interval_id = setInterval(shoot.bind(null,url,flags),interval);
+    shoot(url,flags);
+}
 
 console.log(`Screenshot of ${url} every ${flags.every}`);
-setInterval(shoot.bind(null,url,flags),interval);
-shoot(url,flags);
+let boot = 0;
+if(flags.start){
+    let now = new Date().getTime();
+    let start = Date.parse(flags.start);
+    if(isNaN(start)){
+        return error("you need to specify a valid date format that can be parsed.\n\n  Check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse");
+    }
+    boot = start - now;
+    if(boot < 0){
+        return error("you need to specify a future date");
+    }
+    console.log(`Will start at ${flags.start}, in ${boot} seconds`);
+}
+setTimeout(record,boot); // Start time
