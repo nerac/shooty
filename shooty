@@ -10,19 +10,12 @@ const cli = meow(`
 	  $ shooty <url>
 
 	Options
-<<<<<<< HEAD
       --start           Date it will start (optional)
-      --end             Date it will stop (optional)
+      --stop            Date it will stop (optional)
       --every, -e       Time between every shoot (2m,3h,1d)
       --limit, -l       Number of photos to maintain (optional)
 	  --fullpage, -f    Shoot the entire page not only the viewport (default: false)
 	  --mobile, -m      Enforces a mobile user agent (default: true)
-=======
-	  --every, -e       Time between every shoot (2m,3h,1d)
-	  --output, -o      Specify an output path (./)
-	  --fullpage, -f    Shoot the entire page not only the viewport
-	  --mobile, -m      Enforces a mobile user agent
->>>>>>> 7eaa250cee3b8e27489db1a94f1290c765d2fa17
 	  --version         Displays current version
 	  --help            Displays help
 
@@ -80,6 +73,18 @@ const extractInterval = (time) => {
     let multiplier = letter == 'm' && 60 || letter == 'h' && 60*60 || letter == 'd' && 60*60*24;
     return number*1000*multiplier;
 }
+const getSecondsToDate = (date) => {
+    if(!date) return 0;
+    let start = Date.parse(date);
+    if(isNaN(start)){
+        return error("you need to specify a valid date format that can be parsed.\n\n  Check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse");
+    }
+    secondsToDate = start - (new Date().getTime());
+    if(secondsToDate < 0){
+        return error("you need to specify a future date");
+    }
+    return secondsToDate;
+}
 const shoot = async (url,flags) => {
 
     try{
@@ -114,17 +119,16 @@ function record(){
 }
 
 console.log(`Screenshot of ${flags.domain} every ${flags.every}`);
-let boot = 0;
-if(flags.start){
-    let now = new Date().getTime();
-    let start = Date.parse(flags.start);
-    if(isNaN(start)){
-        return error("you need to specify a valid date format that can be parsed.\n\n  Check: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse");
-    }
-    boot = start - now;
-    if(boot < 0){
-        return error("you need to specify a future date");
-    }
-    console.log(`Will start at ${flags.start}, in ${boot} seconds`);
+let boot = getSecondsToDate(flags.start);
+if(boot > 0)
+    console.log(`Will start at ${flags.start}, in ${boot/1000} seconds`);
+
+let finish = getSecondsToDate(flags.stop);
+if(finish && finish-boot > 60){
+    console.log(`Will stop at ${flags.stop}, in ${finish/1000} seconds`);
+    setTimeout(() => {
+        clearInterval(interval_id);
+        console.log(`Stopped at ${flags.stop}.`);
+    },finish);
 }
 setTimeout(record,boot); // Start time
