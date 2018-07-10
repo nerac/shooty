@@ -2,7 +2,7 @@
 
 Take photos of any website every certain time. Useful for quality checks.
 
-[![npm](https://img.shields.io/npm/v/npm.svg?style=flat-square)](https://www.npmjs.com/package/shooty)
+[![npm](https://img.shields.io/npm/dw/shooty.svg?style=flat-square)](https://www.npmjs.com/package/shooty)
 [![npm](https://img.shields.io/npm/dw/localeval.svg?style=flat-square)](https://www.npmjs.com/package/shooty)
 
 
