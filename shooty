@@ -20,7 +20,8 @@ const cli = meow(`
 	  --help            Displays help
 
 	Examples
-	  $ shooty https://google.com --every 1h
+      $ shooty https://google.com --every 1h
+      $ shooty https://google.com --every 3h --start "10 Jul 2018 22:09:00 GMT+4" --stop "11 Jul 2018 22:09:00 GMT+4"
 `, {
 	flags: {
 		output: {
