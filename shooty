@@ -13,6 +13,7 @@ const cli = meow(`
         --start           Date it will start (optional)
         --stop            Date it will stop (optional)
         --every, -e       Time between every shoot (2m,3h,1d)
+        --limit, -l       Limit of shoots to take (optional)
         --fullpage, -f    Shoot the entire page not only the viewport (default: false)
         --mobile, -m      Enforces a mobile user agent (default: true)
         --version         Displays current version
