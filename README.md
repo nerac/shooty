@@ -3,7 +3,7 @@
 Take photos of any website every certain time. Useful for quality checks.
 
 [![npm](https://img.shields.io/npm/v/shooty.svg)](https://www.npmjs.com/package/shooty)
-[![npm](https://img.shields.io/npm/dw/shooty.svg)](https://www.npmjs.com/package/shooty)
+(https://badges.greenkeeper.io/nerac/shooty.svg)](https://greenkeeper.io/)
 
 
 
@@ -28,15 +28,10 @@ Take photos of any website every certain time. Useful for quality checks.
 		--help            Displays help
 
 	Examples
-		$ shooty https://google.com --every 1h
+		$ shooty https://google.com --every 1h --fullpage
+		$ shooty https://google.com --every 1h --mobile --limit 10
 		$ shooty https://google.com --every 3m --start "10 Jul 2018 22:09:00 GMT+4" --stop "11 Jul 2018 22:09:00 GMT+4"
 
-
-## Features
-
-- [X] Set a start date
-- [X] Set a stop date
-- [ ] Limit the number of images generated
 
 ## Contribute
 

@@ -1,13 +1,23 @@
 {
   "name": "shooty",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Takes screenshoots of a website every X time",
   "main": "shooty",
   "bin": {
     "shooty": "shooty"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "shooty"
+  ],
   "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nerac/shooty.git"
+  },
   "dependencies": {
+    "death": "^1.1.0",
     "meow": "^5.0.0",
     "puppeteer": "^1.5.0"
   },

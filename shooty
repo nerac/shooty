@@ -4,35 +4,81 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const urlx = require('url');
 const meow = require('meow');
+const onDie = require('death'); 
+const fs = require('fs')
+
+let browser = null;
+let page = null;
+let interval_id = null;
+let images = [];
+let index = 0;
+
+const removeImageByLimit = async (path, limit = 0) => {
+    
+    if(limit === 0) return true;
+
+    index++;
+    index = index%limit;
+    
+    if(images[index]){
+        fs.stat(path, (err) => {
+            if(!err){
+                fs.unlink(path, err => {
+                    if(err){
+                        console.log("shit:",err);
+                    }
+                });
+            }
+        });
+    }
+    images[index] = path;
+};
 
 const cli = meow(`
-	Usage
-	  $ shooty <url>
+    Usage
+        $ shooty <url>
 
-	Options
-      --start           Date it will start (optional)
-      --stop            Date it will stop (optional)
-      --every, -e       Time between every shoot (2m,3h,1d)
-      --limit, -l       Number of photos to maintain (optional)
-	  --fullpage, -f    Shoot the entire page not only the viewport (default: false)
-	  --mobile, -m      Enforces a mobile user agent (default: true)
-	  --version         Displays current version
-	  --help            Displays help
+    Options
+        --start           Date it will start (optional)
+        --stop            Date it will stop (optional)
+        --every, -e       Time between every shoot (2m,3h,1d)
+        --limit, -l       Limit of shoots to take (optional)
+        --timeout, -t     Page load timeout in seconds (default:60)
+        --fullpage, -f    Shoot the entire page not only the viewport (default: false)
+        --mobile, -m      Enforces a mobile user agent (default: true)
+        --version         Displays current version
+        --help            Displays help
 
-	Examples
-      $ shooty https://google.com --every 1h
-      $ shooty https://google.com --every 3h --start "10 Jul 2018 22:09:00 GMT+4" --stop "11 Jul 2018 22:09:00 GMT+4"
+    Examples
+        $ shooty https://google.com --every 1h
+        $ shooty https://google.com --every 3h --start "10 Jul 2018 22:09:00 GMT+4" --stop "11 Jul 2018 22:09:00 GMT+4"
 `, {
 	flags: {
 		output: {
 			type: 'string',
 			alias: 'o',
 			default: '.'
+        },
+        start: {
+			type: 'string'
+        },
+        stop: {
+			type: 'string'
+        },
+        limit: {
+			type: 'number',
+            alias: 'l',
+            default: 0
 		},
 		every: {
 			type: 'string',
 			alias: 'e',
 			default: '1h'
+        },
+        timeout: {
+			type: 'number',
+			alias: 't',
+			default: 60
 		},
 		mobile: {
 			type: 'boolean',
@@ -87,49 +133,68 @@ const getSecondsToDate = (date) => {
     return secondsToDate;
 }
 const shoot = async (url,flags) => {
-
+    
     try{
-      let now = (new Date()).toLocaleTimeString();
-      let name = `${flags.domain}_`+now.replace(/[:]/g,'-')+".png";
-      console.log("Taking screenshot at:",now);
-      const browser = await puppeteer.launch({ignoreHTTPSErrors:true});
-      const page = await browser.newPage();
-      page.setDefaultNavigationTimeout(60000);
-      if(flags.mobile){
-        page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25');
-      }
-      await page.goto(url);
-      await page.screenshot({path: path.format({dir:flags.o,base:name}).replace("//","/"), fullPage: flags.fullpage});
-      await browser.close();
-      console.log("Screenshot taken with name:",name);
+        if(!browser)
+            browser = await puppeteer.launch({ignoreHTTPSErrors:true});
+        if(!page)
+            page = await browser.newPage();
+
+        page.setDefaultNavigationTimeout(flags.timeout*1000);
+        if(flags.mobile){
+            page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25');
+        }
+
+        let now = (new Date()).toLocaleTimeString();
+        let name = `${flags.domain}_`+now.replace(/[:]/g,'-')+".png";
+        
+        console.log("Taking screenshot at:",now);
+
+        await page.goto(url);
+        let filename = path.format({dir:flags.o,base:name}).replace("//","/");
+        await page.screenshot({path: filename, fullPage: flags.fullpage});
+        removeImageByLimit(filename,flags.limit);
+        console.log("Screenshot taken with name:",name);
+
     }catch(e){
         console.error('\x1b[31m%s\x1b[0m',`\n  ${e}`);
     }
 
 };
+function record(){
+    interval_id = setInterval(shoot.bind(null,url,flags),interval);
+    shoot(url,flags);
+};
+
+const Exit = (signal, err) => {
+    if(browser){
+        (async () => {
+            await browser.close();
+        })();
+    }
+    if(interval_id)
+        clearInterval(interval_id);
+    
+    console.log('\x1b[32m%s\x1b[0m',`Stopped at ${(new Date()).toString()}.`);
+};
+
+onDie(Exit);
+
 const flags = cli.flags;
 const url = extractURL(cli.input);
 const interval = extractInterval(flags.every);
 flags.domain = urlx.parse(url).hostname;
 
-let interval_id = null;
-
-function record(){
-    interval_id = setInterval(shoot.bind(null,url,flags),interval);
-    shoot(url,flags);
-}
-
-console.log(`Screenshot of ${flags.domain} every ${flags.every}`);
+console.log('\x1b[32m%s\x1b[0m',`Screenshot of ${flags.domain} every ${flags.every}`);
 let boot = getSecondsToDate(flags.start);
 if(boot > 0)
-    console.log(`Will start at ${flags.start}, in ${boot/1000} seconds`);
+    console.log('\x1b[33m%s\x1b[0m',`Will start at ${flags.start}, in ${boot/1000} seconds`);
 
 let finish = getSecondsToDate(flags.stop);
 if(finish && finish-boot > 60){
-    console.log(`Will stop at ${flags.stop}, in ${finish/1000} seconds`);
+    console.log('\x1b[33m%s\x1b[0m',`Will stop at ${flags.stop}, in ${finish/1000} seconds`);
     setTimeout(() => {
-        clearInterval(interval_id);
-        console.log(`Stopped at ${flags.stop}.`);
+        Exit();
     },finish);
 }
 setTimeout(record,boot); // Start time
