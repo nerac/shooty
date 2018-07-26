@@ -1,6 +1,6 @@
 {
   "name": "shooty",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Takes screenshoots of a website every X time",
   "main": "shooty",
   "bin": {
