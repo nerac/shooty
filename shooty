@@ -5,10 +5,34 @@ const path = require('path');
 const urlx = require('url');
 const meow = require('meow');
 const onDie = require('death'); 
+const fs = require('fs')
 
 let browser = null;
 let page = null;
 let interval_id = null;
+let images = [];
+let index = 0;
+
+const removeImageByLimit = async (path, limit = 0) => {
+    
+    if(limit === 0) return true;
+
+    index++;
+    index = index%limit;
+    
+    if(images[index]){
+        fs.stat(path, (err) => {
+            if(!err){
+                fs.unlink(path, err => {
+                    if(err){
+                        console.log("shit:",err);
+                    }
+                });
+            }
+        });
+    }
+    images[index] = path;
+};
 
 const cli = meow(`
     Usage
@@ -109,7 +133,7 @@ const getSecondsToDate = (date) => {
     return secondsToDate;
 }
 const shoot = async (url,flags) => {
-
+    
     try{
         if(!browser)
             browser = await puppeteer.launch({ignoreHTTPSErrors:true});
@@ -127,7 +151,9 @@ const shoot = async (url,flags) => {
         console.log("Taking screenshot at:",now);
 
         await page.goto(url);
-        await page.screenshot({path: path.format({dir:flags.o,base:name}).replace("//","/"), fullPage: flags.fullpage});
+        let filename = path.format({dir:flags.o,base:name}).replace("//","/");
+        await page.screenshot({path: filename, fullPage: flags.fullpage});
+        removeImageByLimit(filename,flags.limit);
         console.log("Screenshot taken with name:",name);
 
     }catch(e){

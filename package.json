@@ -6,7 +6,16 @@
   "bin": {
     "shooty": "shooty"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "shooty"
+  ],
   "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nerac/shooty.git"
+  },
   "dependencies": {
     "death": "^1.1.0",
     "meow": "^5.0.0",
