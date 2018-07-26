@@ -3,7 +3,7 @@
 Take photos of any website every certain time. Useful for quality checks.
 
 [![npm](https://img.shields.io/npm/v/shooty.svg)](https://www.npmjs.com/package/shooty)
-[(https://badges.greenkeeper.io/nerac/shooty.svg)](https://greenkeeper.io/)
+[![greenkeeper](https://badges.greenkeeper.io/nerac/shooty.svg)](https://greenkeeper.io/)
 
 
 
